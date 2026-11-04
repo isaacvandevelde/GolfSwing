@@ -1,0 +1,32 @@
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.log
+.vercel/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Personal inputs, analysis and external reference checkouts
+/local-data/
+/.references/
+/tmp/
+*.mp4
+*.MP4
+*.mov
+*.MOV
+*.m4v
+
+# Local editor and OS state
+.DS_Store
+Thumbs.db
