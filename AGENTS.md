@@ -1,6 +1,6 @@
 # GolfSwing agent instructions
 
-Read README.md, docs/tooling.md and the relevant docs/decisions/ before changes. This repository is the source of truth for code and shared technical decisions.
+Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/decisions/ before changes. This repository is the source of truth for code and shared technical decisions.
 
 ## Working and learning method
 
@@ -12,7 +12,7 @@ Read README.md, docs/tooling.md and the relevant docs/decisions/ before changes.
 
 ## Skills and tools
 
-- Read and use the installed ponytail:ponytail skill for coding and ponytail:ponytail-review for requested change reviews. If unavailable, retain the minimal-change principles above and report the missing skill rather than claiming it ran.
+- Read .agents/skills/ponytail/SKILL.md for coding, .agents/skills/ponytail-review/SKILL.md for requested reviews, and .agents/skills/golfswing-verification/SKILL.md for relevant implementation checks. Prefer these repository copies over duplicate personal installations.
 - Use one relevant React/Next.js guide, Vercel deployment/verification skills for their respective tasks, and Supabase skills only if that service enters scope. See docs/tooling.md.
 - Prefer connected GitHub/Vercel tools when sufficient; use local Git for the working tree. Inspect the actual tool availability before choosing a fallback.
 - Reuse patterns from other projects selectively. Do not import their credentials, service IDs, production permissions, business logic or full skill collections.

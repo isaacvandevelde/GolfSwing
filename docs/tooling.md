@@ -1,31 +1,28 @@
 # Skills, tools and references
 
-## Reused working conventions
+## Repository skills
 
-Apply the selected conventions documented for Seatin and Theates: concise shared context, focused branches, meaningful checks, recorded decisions and explicit separation of Git and deployment status. GolfSwing has its own product and infrastructure boundaries.
+These instructions are available in any checkout under .agents/skills/:
 
-## Available skills to use when relevant
+| Skill | Purpose | Origin |
+| --- | --- | --- |
+| [ponytail](../.agents/skills/ponytail/SKILL.md) | Minimal complete code changes and dependency choices | Ponytail 5.3.3, unchanged |
+| [ponytail-review](../.agents/skills/ponytail-review/SKILL.md) | Review a change in its surrounding code | Ponytail 5.3.3, unchanged |
+| [golfswing-verification](../.agents/skills/golfswing-verification/SKILL.md) | Video, inference, measurement and device verification | Authored for this repository |
 
-| Skill | Use |
-| --- | --- |
-| ponytail:ponytail | Coding and dependency choices; minimal complete changes |
-| ponytail:ponytail-review | Reviewing a change in its surrounding code |
-| vercel:react-best-practices | React checks after editing multiple TSX components |
-| vercel:verification | Verify the actual browser-to-data flow when an application exists |
-| vercel-deploy and applicable Vercel deployment guidance | Authorized preview/deployment work, with targets verified |
-| direct-github-vercel-ops | Investigate actual GitHub Actions or Vercel failures through connectors |
-| supabase:supabase | Only when Supabase is selected or evaluated concretely |
-| understand-anything skills | Architecture exploration when the codebase is large enough to benefit |
+Ponytail source: https://github.com/DietrichGebert/ponytail, version 5.3.3, copied from the installed distribution on 2026-11-04. Each copied skill includes the upstream MIT license and copyright notice. Only the two instruction files and their licenses are bundled; no plugin hooks or executable installer are included. Repository copies take precedence over duplicate personal installations. Review upstream changes before updating these copies.
 
-These are existing personal skill installations, not bundled dependencies. Ponytail 5.3.3 was read during setup. Read each other applicable skill at use time. No additional skill packs or libraries were installed for this foundation.
+## Optional tools
 
-## External repositories
+Use connected GitHub and Vercel tools where available. Apply a relevant React/Next.js guide for UI changes, Vercel deployment/verification guidance when deploying, and Supabase guidance only if that service enters scope. These optional integrations require their own installation and account access; the repository grants neither. Avoid overlapping skill packs.
 
-Checked on 2026-11-04:
+Shared conventions: concise context, focused branches, meaningful checks, recorded decisions and separate reporting of local, pushed and deployed states. Personal notes and service credentials remain outside the repository.
 
-- [MediaPipe](https://github.com/google-ai-edge/mediapipe): official inference implementation and API reference source.
-- [MediaPipe web samples](https://github.com/google-ai-edge/mediapipe-samples-web): official browser examples, useful for investigating pose inference and worker integration.
+## Reference repositories
 
-Both repository pages identify Apache-2.0 licenses. Check the exact file and model licenses before incorporating assets or code, and preserve required notices. These repositories are references, not evidence of accurate golf biomechanics.
+- [MediaPipe](https://github.com/google-ai-edge/mediapipe): official inference implementation and API source.
+- [MediaPipe web samples](https://github.com/google-ai-edge/mediapipe-samples-web): official browser examples for investigating pose inference and worker integration.
 
-If a local checkout becomes useful, place it under .references/<repository>/, which is ignored by GolfSwing Git. Pin and record the upstream commit when relying on it; inspect scripts before running them. Do not clone or install whole projects merely to obtain one example. No reference repositories have been downloaded yet.
+Repository pages checked on 2026-11-04 identify Apache-2.0 licenses. Check exact code and model licenses before incorporation and preserve required notices. These references do not establish accurate golf biomechanics.
+
+Place useful local reference checkouts under ignored .references/<repository>/. Record upstream commits when relying on them and inspect scripts before execution. Neither reference repository is bundled or installed here.

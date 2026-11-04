@@ -20,6 +20,7 @@ Keep raw landmarks so measurements can be recalculated. Treat uncertain tracking
 Repository foundation only: no application, dependencies, CI or deployed environment yet. There are no build or start commands to run.
 
 - [Working instructions](AGENTS.md)
+- [Architecture](docs/architecture.md)
 - [Hybrid decision and next architecture discussion](docs/decisions/0001-hybrid-processing.md)
 - [Skills, tools and reference repositories](docs/tooling.md)
 
