@@ -5,7 +5,7 @@ Status: browser analyzer implemented locally. No server has been launched and no
 ## Accepted decisions
 
 - Mobile-first web application usable in iPhone Safari without a running personal computer.
-- Next.js, TypeScript and Tailwind, with Vercel as the intended web host.
+- Next.js, TypeScript and Tailwind. Vercel hosting was rejected; Cloudflare Pages is a proposal, not a provisioned or accepted deployment.
 - Analyzer before AI coaching.
 - Hybrid processing, with client-side MediaPipe tracking and browser-side analysis as the starting preference.
 - Supabase remains optional; no database, authentication system or cloud worker has been selected.
@@ -30,13 +30,13 @@ flowchart LR
     C -. Results contract to be defined .-> U
 ```
 
-The dotted cloud paths are alternatives under discussion, not implemented or authorized automatic uploads. Serving the website from Vercel does not require running video inference there. A cloud inference service, if needed, will require its own runtime evaluation.
+The dotted cloud paths are alternatives under discussion, not implemented or authorized automatic uploads. Serving the website from a static host does not require running video inference there. A cloud inference service, if needed, will require its own runtime evaluation.
 
 The browser pipeline should retain timestamps, landmarks and confidence alongside visual output. Measurements should not depend on React components or a particular inference location. Avoid creating a generic backend abstraction before a second implementation is justified.
 
 ## Implemented validation slice
 
-Video selection, pose extraction, overlay, scrubber, joint-angle charts and manual phase markers are implemented. Processing time and detection coverage are reported. Real-browser and iPhone verification remains pending because the user requested no launches yet.
+Video selection, pose extraction, overlay, scrubber, joint-angle charts, address-referenced head displacement and manual phase markers are implemented. Processing time and detection coverage are reported. Real-browser and iPhone verification remains pending because the user requested no launches yet.
 
 Preserve slow-motion timing deliberately. Model-derived coordinates and projected joint angles are estimates; do not describe them as validated 3D biomechanics or automatically reliable impact detection.
 
@@ -56,3 +56,9 @@ For each material choice, document pros, cons, recommendation and reversibility,
 Private videos and derived personal data are not repository fixtures. Use synthetic landmarks in committed tests. Upload behavior, access controls and retention must be agreed before introducing a cloud data path. No secrets belong in client bundles or Git.
 
 Use the [verification skill](../.agents/skills/golfswing-verification/SKILL.md). A desktop test or successful build is not evidence of real iPhone performance.
+
+## Recovered analyzer context
+
+The original discussion prioritized timestamped raw landmarks, projected joint angles, head displacement and manually selected phases before AI coaching. The browser app preserves those landmarks in JSON; no new inference is needed to compute head displacement. Camera-specific recording guidance is shown in the interface.
+
+Head displacement uses the nose landmark relative to the nearest sample at the manual address marker. Pixel-space displacement is divided by video height and shown as a percentage, not centimetres or a quality judgment. Missing or uncertain reference/current landmarks remain unavailable. Head rotation and camera motion influence this proxy. True 3D rotation, club tracking, automatic impact detection, annotated-video export and swing comparison remain later work, not implemented features.

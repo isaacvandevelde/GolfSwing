@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CONNECTIONS,
-  jointAngle,
+  metricValue,
   MAX_BYTES,
   MAX_DURATION,
   METRICS,
@@ -11,7 +11,7 @@ import {
   reliable,
   setMarker,
 } from "@/domain/analysis";
-import type { Analysis, Markers, Metric } from "@/domain/analysis";
+import type { Analysis, Landmark, Markers, Metric } from "@/domain/analysis";
 import type { Progress } from "@/browser/analyze-video";
 
 function Arrow({ down = false }: { down?: boolean }) {
@@ -118,52 +118,74 @@ function MovementChart({
   analysis,
   metric,
   time,
+  reference,
 }: {
   analysis: Analysis;
   metric: Metric;
   time: number;
+  reference: Landmark[] | null;
 }) {
-  let path = "";
-  let connected = false;
-  for (const frame of analysis.frames) {
-    const angle = jointAngle(
-      frame.landmarks,
-      METRICS[metric].joints,
-      analysis.width,
-      analysis.height,
-    );
-    if (angle === null) {
-      connected = false;
-      continue;
+  const values = useMemo(
+    () =>
+      analysis.frames.map((frame) => ({
+        time: frame.time,
+        value: metricValue(
+          metric,
+          frame.landmarks,
+          analysis.width,
+          analysis.height,
+          reference,
+        ),
+      })),
+    [analysis, metric, reference],
+  );
+  const maximum =
+    metric === "headMovement"
+      ? Math.max(
+          5,
+          Math.ceil(Math.max(...values.map((item) => item.value ?? 0)) / 5) * 5,
+        )
+      : 180;
+  const unit = metric === "headMovement" ? "%" : "°";
+  const path = useMemo(() => {
+    let result = "";
+    let connected = false;
+    for (const item of values) {
+      if (item.value === null) {
+        connected = false;
+        continue;
+      }
+      const x = 38 + (item.time / analysis.duration) * 510;
+      const y = 132 - (item.value / maximum) * 108;
+      result += `${connected ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)} `;
+      connected = true;
     }
-    const x = 38 + (frame.time / analysis.duration) * 510;
-    const y = 132 - (angle / 180) * 108;
-    path += `${connected ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)} `;
-    connected = true;
-  }
+    return result;
+  }, [values, maximum, analysis.duration]);
   return (
     <svg
       className="movement-chart"
       viewBox="0 0 570 164"
       role="img"
-      aria-label={`${METRICS[metric].label} projected angle over video playback time. Gaps mean unreliable or missing tracking.`}
+      aria-label={`${METRICS[metric].label} over video playback time, in ${metric === "headMovement" ? "percent of video height from address" : "degrees"}. Gaps mean unreliable or missing tracking.`}
     >
-      {[0, 90, 180].map((value) => (
+      {[0, maximum / 2, maximum].map((value) => (
         <g key={value}>
           <line
             x1="38"
             x2="548"
-            y1={132 - (value / 180) * 108}
-            y2={132 - (value / 180) * 108}
+            y1={132 - (value / maximum) * 108}
+            y2={132 - (value / maximum) * 108}
             stroke="#e6e9e1"
           />
           <text
             x="0"
-            y={136 - (value / 180) * 108}
+            y={136 - (value / maximum) * 108}
             fontSize="11"
             fill="#697468"
           >
-            {value}°
+            {value}
+            {unit}
           </text>
         </g>
       ))}
@@ -190,7 +212,7 @@ function MovementChart({
       </text>
       {!path && (
         <text x="285" y="80" textAnchor="middle" fontSize="13" fill="#697468">
-          No reliable measurements for this joint
+          No reliable measurements
         </text>
       )}
     </svg>
@@ -319,7 +341,14 @@ export default function SwingStudio() {
       cameraView,
       markers,
       timeBasis: "video playback seconds; not capture-frame timing",
-      measurementBasis: "2D projected angles; not validated 3D biomechanics",
+      measurementBasis:
+        "2D projected measurements; not validated 3D biomechanics",
+      headMovementBasis: {
+        landmark: "nose",
+        unit: "percent of video height",
+        referenceMarker: "address",
+        referenceSampleTime: referenceFrame?.time ?? null,
+      },
     };
     const downloadUrl = URL.createObjectURL(
       new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
@@ -334,12 +363,22 @@ export default function SwingStudio() {
   const frame = analysis
     ? nearestFrame(analysis.frames, time, 0.75 / analysis.sampleRate)
     : null;
-  const angle = analysis
-    ? jointAngle(
+  const referenceFrame =
+    analysis && markers.address !== undefined
+      ? nearestFrame(
+          analysis.frames,
+          markers.address,
+          0.75 / analysis.sampleRate,
+        )
+      : null;
+  const reference = referenceFrame?.landmarks ?? null;
+  const measurement = analysis
+    ? metricValue(
+        metric,
         frame?.landmarks ?? null,
-        METRICS[metric].joints,
         analysis.width,
         analysis.height,
+        reference,
       )
     : null;
   const detected = analysis
@@ -664,6 +703,11 @@ export default function SwingStudio() {
                   <li>Keep your whole body in frame.</li>
                   <li>Use a steady camera at roughly hip height.</li>
                   <li>Film one golfer, with good light.</li>
+                  <li>
+                    {cameraView === "down-the-line"
+                      ? "Down the line: film from behind, looking toward the target. Use this view to inspect projected posture."
+                      : "Face on: film facing the golfer, across the target line. Use this view to inspect sideways movement in the image."}
+                  </li>
                 </ul>
                 <details>
                   <summary>About this first version</summary>
@@ -676,7 +720,9 @@ export default function SwingStudio() {
                     We sample 15 moments per playback second. Slow-motion
                     playback time is not original capture time. Angles are 2D
                     estimates affected by camera position; no swing score or
-                    coaching judgment is generated.
+                    coaching judgment is generated. A single view cannot measure
+                    true hip or shoulder rotation, weight transfer or clubhead
+                    speed.
                   </p>
                 </details>
               </section>
@@ -733,7 +779,7 @@ export default function SwingStudio() {
                 </div>
                 <div className="measurement-heading">
                   <label>
-                    Projected joint angle
+                    Measurement
                     <select
                       value={metric}
                       onChange={(event) =>
@@ -748,11 +794,17 @@ export default function SwingStudio() {
                     </select>
                   </label>
                   <div className="angle-value">
-                    {angle === null ? "—" : `${Math.round(angle)}°`}
+                    {measurement === null
+                      ? "—"
+                      : metric === "headMovement"
+                        ? `${measurement.toFixed(1)}%`
+                        : `${Math.round(measurement)}°`}
                     <small>
-                      {angle === null
+                      {measurement === null
                         ? "No reliable measurement here"
-                        : "2D angle · camera dependent"}
+                        : metric === "headMovement"
+                          ? "Of video height · from address"
+                          : "2D angle · camera dependent"}
                     </small>
                   </div>
                 </div>
@@ -760,7 +812,17 @@ export default function SwingStudio() {
                   analysis={analysis}
                   metric={metric}
                   time={time}
+                  reference={reference}
                 />
+                {metric === "headMovement" && (
+                  <p>
+                    Set Address below at a moment with a clearly tracked nose.
+                    This graph shows nose displacement from the nearest sample
+                    to that marker, as a percentage of video height. Camera
+                    motion and turning your head also affect it; it is not a
+                    swing score or a distance in centimetres.
+                  </p>
+                )}
                 <div className="phase-heading">
                   <div>
                     <h3>Mark your swing moments</h3>

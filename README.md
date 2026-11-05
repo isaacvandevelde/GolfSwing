@@ -8,6 +8,7 @@ Mobile-first golf swing analysis for iPhone Safari. A local-first analyzer proto
 - Run MediaPipe body tracking in a dedicated browser worker, with progress and cancellation. Video and landmarks are not uploaded.
 - Inspect a skeleton overlay, scrub the playback timeline and step between samples.
 - Plot left/right elbow and knee angles, with missing or uncertain measurements shown as gaps.
+- Inspect head displacement relative to the manual Address marker, in percent of video height, using the nose as a 2D proxy. Camera movement and head rotation affect this measurement; it is not a physical distance.
 - Set address, top and impact markers manually, and save timestamped landmarks, metadata and markers as JSON.
 - Light interface with green accents, responsive controls and a framing guide.
 

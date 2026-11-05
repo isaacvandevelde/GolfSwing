@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   jointAngle,
+  headDisplacement,
+  metricValue,
   nearestFrame,
   sampleTimes,
   setMarker,
@@ -79,4 +81,39 @@ test("manual phases preserve chronological order", () => {
   assert.throws(() => setMarker({ top: 1 }, "address", 1.5));
   assert.throws(() => setMarker({ top: 1 }, "impact", 1));
   assert.throws(() => setMarker({}, "top", NaN));
+});
+
+test("head displacement uses pixel aspect ratio and address as reference", () => {
+  const origin = [point(0.2, 0.3)];
+  const moved = [point(0.6, 0.45)];
+  assert.ok(Math.abs(headDisplacement(moved, origin, 100, 200)! - 25) < 1e-8);
+  assert.equal(headDisplacement(origin, origin, 100, 200), 0);
+  assert.equal(
+    metricValue("headMovement", moved, 100, 200, origin),
+    headDisplacement(moved, origin, 100, 200),
+  );
+  assert.equal(metricValue("leftElbow", null, 100, 200, origin), null);
+});
+test("head movement never invents a baseline or fills missing tracking", () => {
+  const valid = [point(0.2, 0.3)];
+  for (const missing of [
+    null,
+    [],
+    [point(0.2, 0.3, 0.1)],
+    [point(NaN, 0.3)],
+    [{ ...point(0.2, 0.3), presence: 0.1 }],
+  ]) {
+    assert.equal(headDisplacement(valid, missing, 100, 200), null);
+    assert.equal(headDisplacement(missing, valid, 100, 200), null);
+  }
+  for (const size of [0, -1, NaN, Infinity]) {
+    assert.equal(headDisplacement(valid, valid, size, 200), null);
+    assert.equal(headDisplacement(valid, valid, 100, size), null);
+  }
+  const frames = [
+    { time: 0, landmarks: valid },
+    { time: 1, landmarks: null },
+  ];
+  const reference = nearestFrame(frames, 1, 0.05)?.landmarks ?? null;
+  assert.equal(headDisplacement(valid, reference, 100, 200), null);
 });

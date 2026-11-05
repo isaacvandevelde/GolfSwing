@@ -75,7 +75,32 @@ export function jointAngle(
   );
 }
 
+// Nose displacement is a head-position proxy, normalized to video height.
+// It includes camera movement and head rotation; it is not a physical distance.
+export function headDisplacement(
+  points: Landmark[] | null,
+  reference: Landmark[] | null,
+  width: number,
+  height: number,
+): number | null {
+  const nose = points?.[0];
+  const origin = reference?.[0];
+  if (
+    !reliable(nose) ||
+    !reliable(origin) ||
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    width <= 0 ||
+    height <= 0
+  )
+    return null;
+  return (
+    Math.hypot(((nose.x - origin.x) * width) / height, nose.y - origin.y) * 100
+  );
+}
+
 export const METRICS = {
+  headMovement: { label: "Head displacement", joints: null },
   leftElbow: {
     label: "Left elbow",
     joints: [11, 13, 15] as [number, number, number],
@@ -94,6 +119,18 @@ export const METRICS = {
   },
 };
 export type Metric = keyof typeof METRICS;
+
+export function metricValue(
+  metric: Metric,
+  points: Landmark[] | null,
+  width: number,
+  height: number,
+  reference: Landmark[] | null,
+): number | null {
+  return metric === "headMovement"
+    ? headDisplacement(points, reference, width, height)
+    : jointAngle(points, METRICS[metric].joints, width, height);
+}
 
 export function nearestFrame(
   frames: PoseFrame[],
