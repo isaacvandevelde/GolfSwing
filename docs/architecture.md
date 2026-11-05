@@ -1,6 +1,6 @@
 # Architecture
 
-Status: agreed product direction with proposed implementation boundaries. No application or cloud services have been implemented yet.
+Status: browser analyzer implemented locally. No server has been launched and no cloud services have been provisioned. See [the browser-first decision](decisions/0002-browser-first-prototype.md).
 
 ## Accepted decisions
 
@@ -12,9 +12,9 @@ Status: agreed product direction with proposed implementation boundaries. No app
 
 See [the decision record](decisions/0001-hybrid-processing.md) for alternatives and tradeoffs.
 
-## Proposed responsibilities
+## Responsibilities
 
-Keep these responsibilities separable in code; they are not a commitment to separate services or packages.
+The application separates browser video processing (`src/browser/analyze-video.ts` and `public/pose-worker.js`), measurement functions (`src/domain/analysis.ts`) and React presentation (`src/ui/swing-studio.tsx`). These are modules in one app, not separate services.
 
 ```mermaid
 flowchart LR
@@ -34,9 +34,9 @@ The dotted cloud paths are alternatives under discussion, not implemented or aut
 
 The browser pipeline should retain timestamps, landmarks and confidence alongside visual output. Measurements should not depend on React components or a particular inference location. Avoid creating a generic backend abstraction before a second implementation is justified.
 
-## First validation slice
+## Implemented validation slice
 
-Select a short video, extract poses and render an overlay. Measure processing time, UI responsiveness, cancellation and tracking failures on a real iPhone. Then introduce a scrubber, camera-appropriate measurements and manual swing-phase markers.
+Video selection, pose extraction, overlay, scrubber, joint-angle charts and manual phase markers are implemented. Processing time and detection coverage are reported. Real-browser and iPhone verification remains pending because the user requested no launches yet.
 
 Preserve slow-motion timing deliberately. Model-derived coordinates and projected joint angles are estimates; do not describe them as validated 3D biomechanics or automatically reliable impact detection.
 
@@ -45,8 +45,8 @@ Preserve slow-motion timing deliberately. Model-derived coordinates and projecte
 | Choice | Options to discuss | Evidence needed |
 | --- | --- | --- |
 | Cloud input | Derived landmarks, uploaded video, or explicit fallback | On-device failures and privacy expectations |
-| Frame processing | Sampling rate, inference resolution, worker execution | Accuracy versus time and memory on the target device |
-| Persistence | Session only, browser storage, server storage | History/export requirements and retention rules |
+| Frame processing tuning | Current baseline: 15 samples/s, 640-pixel frames, CPU worker | Compare accuracy, time and memory on the target device |
+| Persistence beyond this prototype | Session-only with local JSON export now; browser/server history later | History requirements and retention rules |
 | Cloud runtime | Select only after identifying the actual workload | Model requirements, execution time, cost and deployment limits |
 
 For each material choice, document pros, cons, recommendation and reversibility, then record the accepted outcome before implementing dependent infrastructure.

@@ -18,6 +18,10 @@ Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/deci
 - Reuse patterns from other projects selectively. Do not import their credentials, service IDs, production permissions, business logic or full skill collections.
 - New shared skills belong in .agents/skills/<name>/SKILL.md. Read external skills before installing, record source and version, and avoid duplicate instructions. Personal plugin installations are not repository dependencies.
 
+## Local-only work
+
+- The user requested repository-only development on 2026-11-06. Do not start servers, open running previews, deploy or change hosting until explicitly requested. Builds, type checks and automated tests are allowed.
+
 ## Git and release discipline
 
 - Expected origin: https://github.com/isaacvandevelde/GolfSwing.git. Inspect branch, status, remote and upstream before editing; preserve unrelated changes.

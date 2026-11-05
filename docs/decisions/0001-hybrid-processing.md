@@ -25,6 +25,6 @@ Hybrid offers flexibility but adds two execution environments and data-transfer 
 | Browser offers preview; server reanalyzes an explicitly uploaded clip | Server can use a different model and revisit frames | Larger uploads, retention decisions and processing infrastructure |
 | Browser is primary; server is an explicit fallback | Cloud use can be limited to cases that need it | Two paths require consistent results and clear failure handling |
 
-These options may coexist later; none of these divisions is accepted yet. Compare them using real tracking failures and device measurements. Do not select a backend, queue, database or upload policy implicitly while scaffolding.
+Update: the user selected browser-first with cloud fallback added from test results; see [decision 0002](0002-browser-first-prototype.md). The precise later cloud division remains open. Compare them using real tracking failures and device measurements. Do not select a backend, queue, database or upload policy implicitly while scaffolding.
 
 Initial proposed experiment: video selection, timestamped landmarks and overlay on iPhone 15. Measure processing time, responsiveness and tracking failures before adding infrastructure.

@@ -1,27 +1,54 @@
 # GolfSwing
 
-Mobile-first golf swing analysis for iPhone Safari. Build a useful analyzer before adding AI coaching.
+Mobile-first golf swing analysis for iPhone Safari. A local-first analyzer prototype, with cloud fallback planned only after device tests show a need.
 
-## Agreed direction
+## Implemented
 
-- Next.js, TypeScript and Tailwind; intended hosting on Vercel.
-- Hybrid processing, starting with client-side MediaPipe pose tracking and browser-side measurements. The exact browser/cloud boundary is still open.
-- Supabase is an optional later choice, not an installed dependency.
-- First device target: iPhone 15 on iOS 26. Repeat device checks after OS upgrades.
+- Select an MP4 or MOV from the device, up to 20 seconds and 150 MB. The actual codec must be supported by the browser; an MP4/MOV extension alone does not guarantee decoding.
+- Run MediaPipe body tracking in a dedicated browser worker, with progress and cancellation. Video and landmarks are not uploaded.
+- Inspect a skeleton overlay, scrub the playback timeline and step between samples.
+- Plot left/right elbow and knee angles, with missing or uncertain measurements shown as gaps.
+- Set address, top and impact markers manually, and save timestamped landmarks, metadata and markers as JSON.
+- Light interface with green accents, responsive controls and a framing guide.
 
-## First experiment
+Results stay in the current session unless exported. There is no account, database, cloud inference or saved swing history.
 
-Select a short swing video, extract timestamped body landmarks and inspect a skeleton overlay. Measure processing time, responsiveness and tracking failures on the actual iPhone. Then add a scrubber, camera-appropriate measurements and manually selected swing phases.
+## Local setup
 
-Keep raw landmarks so measurements can be recalculated. Treat uncertain tracking as uncertain; inferred pose coordinates are not validated biomechanical measurements. Club tracking, automatic segmentation, comparisons and AI coaching come later.
+Requires Node 22.18+ or Node 24. On Windows, from the repository directory:
 
-## Current state
+```powershell
+npm.cmd ci
+npm.cmd run prepare:assets
+npm.cmd test
+npm.cmd run format:check
+npm.cmd run typecheck
+npm.cmd run build
+```
 
-Repository foundation only: no application, dependencies, CI or deployed environment yet. There are no build or start commands to run.
+Installation/preparation copies the pinned MediaPipe runtime and downloads the pinned Lite model from Google, checking its SHA-256 hash. The generated assets live in ignored public/mediapipe/. Runtime analysis loads them from the same origin as the app, without sending the selected video elsewhere.
+
+No server was started and nothing was deployed during implementation. When you explicitly choose to run it, the development command is:
+
+```powershell
+npm.cmd run dev
+```
+
+That command serves on port 3000 by default and listens on the local network. It is not a hosted deployment. A phone can use the same-network address, but some browser APIs may require HTTPS; real iPhone verification is still pending.
+
+## Measurement limits
+
+The prototype samples 15 times per playback second and resizes inference frames to at most 640 pixels on the longest edge. Video seeking is browser-controlled, so these are requested sample times, not a guarantee of exact original capture-frame access. Slow-motion playback seconds are not original capture timing. Precise impact timing, club tracking and validated 3D biomechanics are outside this version.
+
+Angles are projected 2D joint angles corrected for video aspect ratio. A straight joint is 180 degrees. Camera position and occlusion affect interpretation; the app does not assign a swing score or coaching judgment. Detection coverage indicates whether a body was found, not whether its pose is accurate.
+
+## Project context
 
 - [Working instructions](AGENTS.md)
 - [Architecture](docs/architecture.md)
-- [Hybrid decision and next architecture discussion](docs/decisions/0001-hybrid-processing.md)
-- [Skills, tools and reference repositories](docs/tooling.md)
+- [Hybrid direction](docs/decisions/0001-hybrid-processing.md)
+- [Browser-first implementation and local-only scope](docs/decisions/0002-browser-first-prototype.md)
+- [Skills and tools](docs/tooling.md)
+- [Third-party notices](docs/third-party.md)
 
-The agent implements the app. The user learns by comparing material architecture options before choosing them. Code and technical decisions belong here; personal context remains in Brain.
+The agent implements the app; meaningful architecture choices are discussed with the user first. Personal context stays outside this public repository.
