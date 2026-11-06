@@ -20,7 +20,8 @@ Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/deci
 
 ## Local-only work
 
-- The user requested repository-only development on 2026-11-06. Do not start servers, open running previews, deploy or change hosting until explicitly requested. Builds, type checks and automated tests are allowed.
+- The user subsequently authorized local execution and previews. Do not deploy or change hosting until explicitly requested. Builds, type checks and automated tests are allowed.
+- Use a compact engineering workbench, inspired by the basketball computer-vision reference: video, overlays, plots, measurements and raw data. Avoid product slogans and decorative onboarding.
 
 ## Git and release discipline
 
@@ -38,3 +39,13 @@ Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/deci
 - Test meaningful calculation and failure behavior. For UI work, check responsive layout, touch controls, progress, cancellation and errors. Run only checks relevant to the change.
 - A desktop browser or WebKit test does not prove iPhone Safari compatibility. Record device, OS, clip properties and observed results when testing on hardware; never claim device testing without evidence.
 - Run the applicable existing checks and inspect the diff before committing. Documentation-only changes need link/content and whitespace checks, not invented application tests.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

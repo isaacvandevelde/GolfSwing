@@ -1,6 +1,6 @@
 # Architecture
 
-Status: browser analyzer implemented locally. No server has been launched and no cloud services have been provisioned. See [the browser-first decision](decisions/0002-browser-first-prototype.md).
+Status: browser analyzer implemented locally. Local execution is authorized; no cloud services have been provisioned. See [the browser-first decision](decisions/0002-browser-first-prototype.md).
 
 ## Accepted decisions
 
@@ -36,7 +36,7 @@ The browser pipeline should retain timestamps, landmarks and confidence alongsid
 
 ## Implemented validation slice
 
-Video selection, pose extraction, overlay, scrubber, joint-angle charts, address-referenced head displacement and manual phase markers are implemented. Processing time and detection coverage are reported. Real-browser and iPhone verification remains pending because the user requested no launches yet.
+Video selection, pose extraction, overlay, scrubber, joint-angle charts, address-referenced head displacement and manual phase markers are implemented. Processing time and detection coverage are reported. Desktop visual verification is now authorized; real iPhone verification remains pending.
 
 Preserve slow-motion timing deliberately. Model-derived coordinates and projected joint angles are estimates; do not describe them as validated 3D biomechanics or automatically reliable impact detection.
 
@@ -62,3 +62,7 @@ Use the [verification skill](../.agents/skills/golfswing-verification/SKILL.md).
 The original discussion prioritized timestamped raw landmarks, projected joint angles, head displacement and manually selected phases before AI coaching. The browser app preserves those landmarks in JSON; no new inference is needed to compute head displacement. Camera-specific recording guidance is shown in the interface.
 
 Head displacement uses the nose landmark relative to the nearest sample at the manual address marker. Pixel-space displacement is divided by video height and shown as a percentage, not centimetres or a quality judgment. Missing or uncertain reference/current landmarks remain unavailable. Head rotation and camera motion influence this proxy. True 3D rotation, club tracking, automatic impact detection, annotated-video export and swing comparison remain later work, not implemented features.
+
+## Analysis workbench interface
+
+The user superseded the initial consumer coaching-tool visual direction with an engineering workbench, based on Jeremy Park's basketball visualization in https://github.com/jeremyipark/vision-demos. Use compact dark panels, prominent annotated video, color-coded body sides, signal plots and inspectable raw landmarks. No slogans, product onboarding or illustrative fake data. This changes presentation, not the accepted browser-first processing architecture. No source code or assets from that reference were copied.

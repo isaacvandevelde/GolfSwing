@@ -14,106 +14,6 @@ import {
 import type { Analysis, Landmark, Markers, Metric } from "@/domain/analysis";
 import type { Progress } from "@/browser/analyze-video";
 
-function Arrow({ down = false }: { down?: boolean }) {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      aria-hidden="true"
-      style={{ transform: down ? "rotate(90deg)" : undefined }}
-    >
-      <path d="M4 12h15m-6-6 6 6-6 6" />
-    </svg>
-  );
-}
-
-function FramingGuide() {
-  return (
-    <svg
-      viewBox="0 0 480 330"
-      className="framing-art"
-      aria-label="Illustration showing a golfer fully in frame"
-      role="img"
-    >
-      <defs>
-        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-          <path
-            d="M30 0H0V30"
-            fill="none"
-            stroke="#4d665c"
-            strokeWidth="0.5"
-            opacity="0.23"
-          />
-        </pattern>
-      </defs>
-      <rect width="480" height="330" fill="url(#grid)" />
-      <ellipse
-        cx="250"
-        cy="285"
-        rx="104"
-        ry="12"
-        fill="#354b3e"
-        opacity="0.5"
-      />
-      <path
-        d="M150 210C48 30 365-7 390 163"
-        stroke="#9ab49b"
-        strokeWidth="1"
-        strokeDasharray="5 6"
-        fill="none"
-        opacity="0.6"
-      />
-      <path
-        d="M155 80V60h28m142 0h28v20M155 245v25h28m142 0h28v-25"
-        stroke="#bddd9c"
-        strokeWidth="2"
-        fill="none"
-      />
-      <path
-        d="m242 123-25 65 23 36-26 54m26-54 40 51M242 123l25 28 42-30m-92 67 38-29 54-38"
-        stroke="#7d9b88"
-        strokeWidth="19"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="251" cy="99" r="19" fill="#7d9b88" />
-      <path
-        d="m309 121 46-82 14 3"
-        stroke="#d5ddd1"
-        strokeWidth="3"
-        fill="none"
-        strokeLinecap="round"
-      />
-      <path
-        d="m242 123-25 65 23 36-26 54m26-54 40 51M242 123l25 28 42-30m-92 67 38-29 54-38"
-        stroke="#d4f591"
-        strokeWidth="2"
-        fill="none"
-      />
-      {[
-        [242, 123],
-        [217, 188],
-        [240, 224],
-        [214, 278],
-        [280, 275],
-        [267, 151],
-        [309, 121],
-        [255, 159],
-      ].map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r="4" fill="#e2ffad" />
-      ))}
-      <text x="28" y="305" fill="#99ac9f" fontSize="10" letterSpacing="2">
-        FRAMING GUIDE · ILLUSTRATION
-      </text>
-    </svg>
-  );
-}
-
 function MovementChart({
   analysis,
   metric,
@@ -176,13 +76,13 @@ function MovementChart({
             x2="548"
             y1={132 - (value / maximum) * 108}
             y2={132 - (value / maximum) * 108}
-            stroke="#e6e9e1"
+            stroke="#343a40"
           />
           <text
             x="0"
             y={136 - (value / maximum) * 108}
             fontSize="11"
-            fill="#697468"
+            fill="#a3abb4"
           >
             {value}
             {unit}
@@ -192,7 +92,7 @@ function MovementChart({
       <path
         d={path}
         fill="none"
-        stroke="#4e742c"
+        stroke="#64d9ed"
         strokeWidth="2.5"
         strokeLinejoin="round"
       />
@@ -201,17 +101,17 @@ function MovementChart({
         x2={38 + (time / analysis.duration) * 510}
         y1="18"
         y2="136"
-        stroke="#303f32"
+        stroke="#e4e9ee"
         strokeDasharray="3 4"
       />
-      <text x="38" y="157" fontSize="11" fill="#697468">
+      <text x="38" y="157" fontSize="11" fill="#a3abb4">
         0s
       </text>
-      <text x="548" y="157" textAnchor="end" fontSize="11" fill="#697468">
+      <text x="548" y="157" textAnchor="end" fontSize="11" fill="#a3abb4">
         {analysis.duration.toFixed(1)}s
       </text>
       {!path && (
-        <text x="285" y="80" textAnchor="middle" fontSize="13" fill="#697468">
+        <text x="285" y="80" textAnchor="middle" fontSize="13" fill="#a3abb4">
           No reliable measurements
         </text>
       )}
@@ -388,499 +288,449 @@ export default function SwingStudio() {
     !!file && duration > 0 && duration <= MAX_DURATION && !busy;
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar" aria-label="Application identity">
-        <a className="brand-mark" href="/" aria-label="GolfSwing home">
-          g<span>↗</span>
-        </a>
-        <span className="rail-icon" aria-label="Swing studio">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden="true"
-          >
-            <rect x="4" y="4" width="16" height="16" rx="4" />
-            <path d="m10 8 6 4-6 4z" />
-          </svg>
+    <div className="workbench">
+      <header className="workbench-header">
+        <h1>
+          GolfSwing <span>/ analysis workbench</span>
+        </h1>
+        <span className="run-status">
+          {busy ? "PROCESSING" : analysis ? "ANALYZED" : "IDLE"}
         </span>
-        <span className="rail-label">YOUR GAME. IN FOCUS.</span>
-      </aside>
-      <div className="app-content">
-        <header className="topbar">
-          <a href="/" className="wordmark">
-            GolfSwing<span className="wordmark-dot">.</span>
-          </a>
-          <span className="prototype-label">
-            EARLY ACCESS <span>01</span>
-          </span>
-        </header>
-        <main id="main">
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">THE SWING STUDIO</p>
-              <h1>
-                See your swing.
-                <br className="mobile-break" /> Find your rhythm.
-              </h1>
-              <p className="intro">
-                A closer look at the movement behind every shot.
-              </p>
+      </header>
+      <main className="workspace">
+        <div className="viewer-column">
+          <section className="panel" aria-labelledby="video-title">
+            <div className="panel-heading">
+              <h2 id="video-title">01 / Video + pose</h2>
+              <label className="inline-control">
+                <input
+                  type="checkbox"
+                  checked={overlay}
+                  onChange={(event) => setOverlay(event.target.checked)}
+                />{" "}
+                Skeleton
+              </label>
             </div>
-            <span className="session-badge">
-              <span /> Private session
-            </span>
-          </div>
-          <div className="studio-grid">
-            <section className="video-card" aria-labelledby="video-title">
-              <div className="card-header">
-                <div className="flex items-center gap-3">
-                  <span className="step-number">01</span>
-                  <h2 id="video-title">Your swing</h2>
-                </div>
-                <span className="subtle-label">
-                  {file ? "VIDEO LOADED" : "START HERE"}
-                </span>
-              </div>
-              {url ? (
-                <div className="video-stage">
-                  <video
-                    ref={video}
-                    src={url}
-                    controls
-                    playsInline
-                    preload="auto"
-                    onLoadedMetadata={(event) => {
-                      const seconds = event.currentTarget.duration;
-                      if (
-                        !Number.isFinite(seconds) ||
-                        seconds <= 0 ||
-                        seconds > MAX_DURATION
-                      ) {
-                        setDuration(0);
-                        setError(
-                          "Trim your video to 20 seconds or less in Photos, then choose it again.",
-                        );
-                      } else setDuration(seconds);
-                    }}
-                    onTimeUpdate={(event) =>
-                      setTime(event.currentTarget.currentTime)
-                    }
-                    onSeeked={(event) =>
-                      setTime(event.currentTarget.currentTime)
-                    }
-                    onError={() => {
+            {url ? (
+              <div className="video-stage">
+                <video
+                  ref={video}
+                  src={url}
+                  controls
+                  playsInline
+                  preload="auto"
+                  onLoadedMetadata={(event) => {
+                    const seconds = event.currentTarget.duration;
+                    if (
+                      !Number.isFinite(seconds) ||
+                      seconds <= 0 ||
+                      seconds > MAX_DURATION
+                    ) {
                       setDuration(0);
                       setError(
-                        "This video could not be opened. Try exporting it as an MP4 from Photos.",
+                        "Trim your video to 20 seconds or less in Photos, then choose it again.",
                       );
-                    }}
-                    aria-label="Your swing video"
-                  />
-                  {analysis && overlay && frame?.landmarks && (
-                    <svg
-                      className="pose-overlay"
-                      viewBox={`0 0 ${analysis.width} ${analysis.height}`}
-                      aria-label="Detected body landmarks"
-                      role="img"
-                    >
-                      {CONNECTIONS.map(([a, b]) => {
-                        const p = frame.landmarks?.[a];
-                        const q = frame.landmarks?.[b];
-                        return reliable(p) && reliable(q) ? (
-                          <line
-                            key={`${a}-${b}`}
-                            x1={p.x * analysis.width}
-                            y1={p.y * analysis.height}
-                            x2={q.x * analysis.width}
-                            y2={q.y * analysis.height}
-                            stroke="#cafa7e"
-                            strokeWidth={Math.max(2, analysis.width / 220)}
-                          />
-                        ) : null;
-                      })}
-                      {frame.landmarks.map((p, i) =>
-                        reliable(p) ? (
-                          <circle
-                            key={i}
-                            cx={p.x * analysis.width}
-                            cy={p.y * analysis.height}
-                            r={Math.max(3, analysis.width / 140)}
-                            fill="#f3ffdb"
-                            stroke="#537338"
-                            strokeWidth={Math.max(1, analysis.width / 600)}
-                          />
-                        ) : null,
-                      )}
-                    </svg>
-                  )}
-                </div>
-              ) : (
-                <div className="empty-stage">
-                  <FramingGuide />
-                  <div className="empty-caption">
-                    <span className="tiny-dot" /> A little perspective changes
-                    everything.
-                  </div>
-                </div>
-              )}
-              <div className="upload-panel">
-                <input
-                  ref={input}
-                  type="file"
-                  accept="video/*,.mov,.mp4,.m4v"
-                  className="sr-only"
-                  tabIndex={-1}
-                  aria-label="Choose swing video"
-                  disabled={busy}
-                  onChange={(event) => {
-                    chooseFile(event.target.files?.[0]);
-                    event.target.value = "";
+                    } else setDuration(seconds);
                   }}
+                  onTimeUpdate={(event) =>
+                    setTime(event.currentTarget.currentTime)
+                  }
+                  onSeeked={(event) => setTime(event.currentTarget.currentTime)}
+                  onError={() => {
+                    setDuration(0);
+                    setError(
+                      "This video could not be opened. Try exporting it as an MP4 from Photos.",
+                    );
+                  }}
+                  aria-label="Your swing video"
                 />
-                {!file ? (
-                  <>
-                    <h3>Every swing has a story.</h3>
-                    <p>
-                      Choose a short clip from your camera roll.
-                      <br />
-                      We’ll help you explore the movement.
-                    </p>
-                    <button
-                      className="primary-button"
-                      onClick={() => input.current?.click()}
-                    >
-                      Choose a swing video <Arrow />
-                    </button>
-                    <span className="file-hint">
-                      MP4 or MOV · Up to 20 seconds · 150 MB
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="file-details">
-                      <div>
-                        <strong>{file.name}</strong>
-                        <span>
-                          {(file.size / 1024 / 1024).toFixed(1)} MB
-                          {duration ? ` · ${duration.toFixed(1)} seconds` : ""}
-                        </span>
-                      </div>
-                      <button
-                        className="text-button"
-                        disabled={busy}
-                        onClick={() => input.current?.click()}
-                      >
-                        Change video
-                      </button>
-                    </div>
-                    <div className="analysis-actions">
-                      <label className="view-field">
-                        Camera view
-                        <select
-                          value={cameraView}
-                          disabled={busy}
-                          onChange={(event) =>
-                            setCameraView(event.target.value)
-                          }
-                        >
-                          <option value="down-the-line">Down the line</option>
-                          <option value="face-on">Face on</option>
-                        </select>
-                      </label>
-                      <button
-                        className="primary-button"
-                        disabled={!canAnalyze}
-                        onClick={analyze}
-                      >
-                        {analysis ? "Analyze again" : "Analyze swing"}
-                        <Arrow />
-                      </button>
-                    </div>
-                  </>
-                )}
-                {progress && (
-                  <div className="progress-area" role="status">
-                    <div className="progress-heading">
-                      <span>{progress.message}</span>
-                      <button
-                        className="text-button"
-                        onClick={() => controller.current?.abort()}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    <progress
-                      value={progress.fraction}
-                      max={1}
-                      aria-label="Analysis progress"
-                    />
-                    <small>
-                      Keep this tab open while your swing is processed.
-                    </small>
-                  </div>
-                )}
-                {error && (
-                  <div className="message error" role="alert">
-                    {error}
-                  </div>
-                )}
-                {notice && (
-                  <div className="message" role="status">
-                    {notice}
-                  </div>
+                {analysis && overlay && frame?.landmarks && (
+                  <svg
+                    className="pose-overlay"
+                    viewBox={`0 0 ${analysis.width} ${analysis.height}`}
+                    aria-label="Detected body landmarks"
+                    role="img"
+                  >
+                    {CONNECTIONS.map(([a, b]) => {
+                      const p = frame.landmarks?.[a];
+                      const q = frame.landmarks?.[b];
+                      return reliable(p) && reliable(q) ? (
+                        <line
+                          key={`${a}-${b}`}
+                          x1={p.x * analysis.width}
+                          y1={p.y * analysis.height}
+                          x2={q.x * analysis.width}
+                          y2={q.y * analysis.height}
+                          stroke={a % 2 ? "#64d9ed" : "#ed91c8"}
+                          strokeWidth={Math.max(2, analysis.width / 220)}
+                        />
+                      ) : null;
+                    })}
+                    {frame.landmarks.map((p, i) =>
+                      reliable(p) ? (
+                        <circle
+                          key={i}
+                          cx={p.x * analysis.width}
+                          cy={p.y * analysis.height}
+                          r={Math.max(3, analysis.width / 140)}
+                          fill={i % 2 ? "#64d9ed" : "#ed91c8"}
+                          stroke="#101214"
+                          strokeWidth={Math.max(1, analysis.width / 600)}
+                        />
+                      ) : null,
+                    )}
+                  </svg>
                 )}
               </div>
-            </section>
-            <aside className="right-column">
-              <section className="insight-card" aria-labelledby="insight-title">
-                <div className="card-header">
-                  <div className="flex items-center gap-3">
-                    <span className="step-number">02</span>
-                    <h2 id="insight-title">A clearer picture</h2>
-                  </div>
-                  <span aria-hidden="true">↗</span>
-                </div>
-                {analysis ? (
-                  <div className="insight-body">
-                    <span className="eyebrow">BODY TRACKING</span>
-                    <div className="stat-value">
-                      {Math.round((detected / analysis.frames.length) * 100)}
-                      <span>%</span>
-                    </div>
-                    <p>
-                      of sampled moments have a detected body. This is coverage,
-                      not an accuracy score.
-                    </p>
-                    <div className="stat-pair">
-                      <span>
-                        Processing time
-                        <strong>
-                          {analysis.processingSeconds.toFixed(1)}s
-                        </strong>
-                      </span>
-                      <span>
-                        Samples<strong>{analysis.frames.length}</strong>
-                      </span>
-                    </div>
-                    <button className="secondary-button" onClick={download}>
-                      Save analysis data <Arrow down />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="insight-body">
-                    <div className="insight-glyph" aria-hidden="true">
-                      ⌁
-                    </div>
-                    <h3>
-                      Less guesswork.
-                      <br />
-                      More understanding.
-                    </h3>
-                    <p>
-                      Follow your body position, slow things down, and spot how
-                      your movement changes.
-                    </p>
-                    <div className="feature-row">
-                      <span>01</span> Body tracking
-                    </div>
-                    <div className="feature-row">
-                      <span>02</span> Joint-angle graphs
-                    </div>
-                    <div className="feature-row">
-                      <span>03</span> Your key swing moments
-                    </div>
-                  </div>
-                )}
-              </section>
-              <section className="tips-card">
-                <p className="eyebrow">SET UP A BETTER SHOT</p>
-                <h3>Good footage. Better insight.</h3>
-                <ul>
-                  <li>Keep your whole body in frame.</li>
-                  <li>Use a steady camera at roughly hip height.</li>
-                  <li>Film one golfer, with good light.</li>
-                  <li>
-                    {cameraView === "down-the-line"
-                      ? "Down the line: film from behind, looking toward the target. Use this view to inspect projected posture."
-                      : "Face on: film facing the golfer, across the target line. Use this view to inspect sideways movement in the image."}
-                  </li>
-                </ul>
-                <details>
-                  <summary>About this first version</summary>
-                  <p>
-                    Analysis runs on this device. Your video and measurements
-                    are not uploaded. Results stay in this session unless you
-                    save them.
-                  </p>
-                  <p>
-                    We sample 15 moments per playback second. Slow-motion
-                    playback time is not original capture time. Angles are 2D
-                    estimates affected by camera position; no swing score or
-                    coaching judgment is generated. A single view cannot measure
-                    true hip or shoulder rotation, weight transfer or clubhead
-                    speed.
-                  </p>
-                </details>
-              </section>
-            </aside>
-          </div>
+            ) : (
+              <div className="empty-stage">
+                <strong>No video loaded</strong>
+                <span>Open MP4 / MOV → run extraction → inspect samples</span>
+              </div>
+            )}
 
-          {analysis && (
-            <section className="results-card" aria-labelledby="results-title">
-              <div className="card-header">
-                <div className="flex items-center gap-3">
-                  <span className="step-number">03</span>
-                  <h2 id="results-title">Explore the movement</h2>
-                </div>
-                <label className="overlay-toggle">
-                  <input
-                    type="checkbox"
-                    checked={overlay}
-                    onChange={(event) => setOverlay(event.target.checked)}
-                  />{" "}
-                  Skeleton
-                </label>
+            <div className="video-readout">
+              <span>t = {time.toFixed(3)} s</span>
+              <span className="left-color">● left</span>
+              <span className="right-color">● right</span>
+              <span>
+                {frame?.landmarks
+                  ? "pose detected"
+                  : analysis
+                    ? "no pose at this time"
+                    : "no pose data"}
+              </span>
+            </div>
+            <div className="transport">
+              <input
+                type="range"
+                min={0}
+                max={duration || 1}
+                step={analysis ? 1 / analysis.sampleRate : 0.01}
+                value={time}
+                disabled={!duration}
+                onChange={(event) => seek(Number(event.target.value))}
+                aria-label="Video position"
+                aria-valuetext={time.toFixed(2) + " seconds"}
+              />
+              <div className="transport-buttons">
+                <button
+                  disabled={!analysis}
+                  onClick={() => seek(time - 1 / (analysis?.sampleRate || 15))}
+                >
+                  ← Sample
+                </button>
+                <button
+                  disabled={!analysis}
+                  onClick={() => seek(time + 1 / (analysis?.sampleRate || 15))}
+                >
+                  Sample →
+                </button>
+                <span>
+                  {time.toFixed(2)} / {duration.toFixed(2)} s
+                </span>
               </div>
-              <div className="results-body">
-                <div className="timeline-heading">
-                  <span>VIDEO TIMELINE</span>
-                  <span className="time-readout">
-                    {time.toFixed(2)} <span>/ {duration.toFixed(2)}s</span>
-                  </span>
-                </div>
-                <input
-                  className="timeline"
-                  type="range"
-                  min={0}
-                  max={duration}
-                  step={1 / analysis.sampleRate}
-                  value={time}
-                  onChange={(event) => seek(Number(event.target.value))}
-                  aria-label="Video position"
-                  aria-valuetext={`${time.toFixed(2)} seconds`}
-                />
-                <div className="timeline-controls">
-                  <button
-                    className="secondary-button"
-                    onClick={() => seek(time - 1 / analysis.sampleRate)}
+            </div>
+          </section>
+          <section className="panel" aria-labelledby="results-title">
+            <div className="panel-heading">
+              <h2 id="results-title">02 / Measurements</h2>
+              <span>2D projection</span>
+            </div>
+            <div className="panel-body">
+              <div className="measurement-heading">
+                <label>
+                  Signal
+                  <select
+                    value={metric}
+                    onChange={(event) =>
+                      setMetric(event.target.value as Metric)
+                    }
                   >
-                    ← Previous sample
-                  </button>
-                  <button
-                    className="secondary-button"
-                    onClick={() => seek(time + 1 / analysis.sampleRate)}
-                  >
-                    Next sample →
-                  </button>
-                </div>
-                <div className="measurement-heading">
-                  <label>
-                    Measurement
-                    <select
-                      value={metric}
-                      onChange={(event) =>
-                        setMetric(event.target.value as Metric)
-                      }
-                    >
-                      {Object.entries(METRICS).map(([key, value]) => (
-                        <option key={key} value={key}>
-                          {value.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="angle-value">
-                    {measurement === null
-                      ? "—"
-                      : metric === "headMovement"
-                        ? `${measurement.toFixed(1)}%`
-                        : `${Math.round(measurement)}°`}
-                    <small>
-                      {measurement === null
-                        ? "No reliable measurement here"
-                        : metric === "headMovement"
-                          ? "Of video height · from address"
-                          : "2D angle · camera dependent"}
-                    </small>
-                  </div>
-                </div>
+                    {Object.entries(METRICS).map(([key, item]) => (
+                      <option key={key} value={key}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <output className="measurement-value">
+                  {measurement === null
+                    ? "—"
+                    : metric === "headMovement"
+                      ? measurement.toFixed(1) + "%"
+                      : measurement.toFixed(1) + "°"}
+                </output>
+              </div>
+              {analysis ? (
                 <MovementChart
                   analysis={analysis}
                   metric={metric}
                   time={time}
                   reference={reference}
                 />
-                {metric === "headMovement" && (
-                  <p>
-                    Set Address below at a moment with a clearly tracked nose.
-                    This graph shows nose displacement from the nearest sample
-                    to that marker, as a percentage of video height. Camera
-                    motion and turning your head also affect it; it is not a
-                    swing score or a distance in centimetres.
-                  </p>
-                )}
-                <div className="phase-heading">
-                  <div>
-                    <h3>Mark your swing moments</h3>
-                    <p>
-                      Scrub to a moment, then set its marker. These are your
-                      selections.
-                    </p>
-                  </div>
-                  <button
-                    className="text-button"
-                    onClick={() => setMarkers({})}
-                  >
-                    Clear markers
+              ) : (
+                <div className="chart-empty">
+                  Run pose extraction to populate the signal.
+                </div>
+              )}
+              <p className="technical-note">
+                {metric === "headMovement"
+                  ? "Nose displacement from Address, as % of video height. Set a reliable Address sample first. Camera movement and head rotation affect this proxy."
+                  : "Projected joint angle. Straight = 180°. Gaps indicate missing or uncertain tracking."}
+              </p>
+            </div>
+          </section>
+          <section className="panel" aria-labelledby="phase-title">
+            <div className="panel-heading">
+              <h2 id="phase-title">03 / Manual events</h2>
+              <button
+                className="text-button"
+                disabled={!analysis}
+                onClick={() => setMarkers({})}
+              >
+                Clear
+              </button>
+            </div>
+            <div className="panel-body phase-buttons">
+              {(["address", "top", "impact"] as const).map((name) => (
+                <button
+                  key={name}
+                  disabled={!analysis}
+                  onClick={() => mark(name)}
+                >
+                  <span>{name === "top" ? "Top of backswing" : name}</span>
+                  <strong>
+                    {markers[name] === undefined
+                      ? "Set at cursor"
+                      : markers[name]?.toFixed(3) + " s · update"}
+                  </strong>
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+        <aside className="inspector">
+          <section className="panel" aria-labelledby="input-title">
+            <div className="panel-heading">
+              <h2 id="input-title">Input</h2>
+              <span>MP4 / MOV</span>
+            </div>
+            <div className="panel-body controls">
+              <input
+                ref={input}
+                type="file"
+                accept="video/*,.mov,.mp4,.m4v"
+                className="sr-only"
+                tabIndex={-1}
+                aria-label="Choose swing video"
+                disabled={busy}
+                onChange={(event) => {
+                  chooseFile(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
+              />
+              <button disabled={busy} onClick={() => input.current?.click()}>
+                {file ? "Replace video…" : "Open video…"}
+              </button>
+              <div className="source-name">
+                {file?.name || "No source selected"}
+              </div>
+              <dl className="metadata">
+                <dt>Size</dt>
+                <dd>
+                  {file ? (file.size / 1024 / 1024).toFixed(1) + " MiB" : "—"}
+                </dd>
+                <dt>Duration</dt>
+                <dd>{duration ? duration.toFixed(3) + " s" : "—"}</dd>
+                <dt>Dimensions</dt>
+                <dd>
+                  {analysis ? analysis.width + " × " + analysis.height : "—"}
+                </dd>
+              </dl>
+              <label>
+                Camera view
+                <select
+                  value={cameraView}
+                  disabled={busy}
+                  onChange={(event) => setCameraView(event.target.value)}
+                >
+                  <option value="down-the-line">Down the line</option>
+                  <option value="face-on">Face on</option>
+                </select>
+              </label>
+              <button
+                className="primary-button"
+                disabled={!canAnalyze}
+                onClick={analyze}
+              >
+                {analysis ? "Re-run pose extraction" : "Run pose extraction"}
+              </button>
+              {progress && (
+                <div className="progress-area" role="status">
+                  <span>{progress.message}</span>
+                  <progress
+                    value={progress.fraction}
+                    max={1}
+                    aria-label="Analysis progress"
+                  />
+                  <button onClick={() => controller.current?.abort()}>
+                    Cancel
                   </button>
                 </div>
-                <div className="phase-buttons">
-                  {(["address", "top", "impact"] as const).map((name) => (
-                    <button
-                      key={name}
-                      className="phase-button"
-                      onClick={() => mark(name)}
-                    >
-                      <span>
-                        {name === "top"
-                          ? "Top of backswing"
-                          : name[0].toUpperCase() + name.slice(1)}
-                      </span>
-                      <strong>
-                        {markers[name] === undefined
-                          ? "Set at current time +"
-                          : `${markers[name]?.toFixed(2)}s · update`}
-                      </strong>
-                    </button>
-                  ))}
+              )}
+              {error && (
+                <div className="message error" role="alert">
+                  {error}
                 </div>
-              </div>
-            </section>
-          )}
-          <footer>
-            <span className="privacy-note">
-              <svg
-                width="14"
-                height="16"
-                viewBox="0 0 20 22"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                aria-hidden="true"
+              )}
+              {notice && (
+                <div className="message" role="status">
+                  {notice}
+                </div>
+              )}
+              <p className="technical-note">
+                ≤ 20 s · ≤ 150 MiB · browser-supported codec
+              </p>
+            </div>
+          </section>
+          <section className="panel" aria-labelledby="pipeline-title">
+            <div className="panel-heading">
+              <h2 id="pipeline-title">Pipeline / run data</h2>
+            </div>
+            <div className="panel-body">
+              <dl className="metadata">
+                <dt>Model</dt>
+                <dd>MediaPipe Pose Lite</dd>
+                <dt>Runtime</dt>
+                <dd>Browser · CPU worker</dd>
+                <dt>Sampling</dt>
+                <dd>15 / playback second</dd>
+                <dt>Inference size</dt>
+                <dd>≤ 640 px longest edge</dd>
+                <dt>Pose samples</dt>
+                <dd>
+                  {analysis ? detected + " / " + analysis.frames.length : "—"}
+                </dd>
+                <dt>Processing</dt>
+                <dd>
+                  {analysis
+                    ? analysis.processingSeconds.toFixed(2) + " s"
+                    : "—"}
+                </dd>
+              </dl>
+              <button
+                className="export-button"
+                disabled={!analysis}
+                onClick={download}
               >
-                <path d="m10 2 7 3v6c0 4-7 9-7 9s-7-5-7-9V5z" />
-                <path d="m6 10 3 3 5-6" />
-              </svg>{" "}
-              Your swing stays on your device.
-            </span>
-            <span>Built for a closer look.</span>
-          </footer>
-        </main>
-      </div>
+                Export landmarks + events.json
+              </button>
+              <p className="technical-note">
+                Samples found ≠ tracking accuracy. Video and landmarks stay in
+                this browser session unless exported.
+              </p>
+            </div>
+          </section>
+          <section className="panel" aria-labelledby="sample-title">
+            <div className="panel-heading">
+              <h2 id="sample-title">Sample inspector</h2>
+              <span>{frame ? frame.time.toFixed(3) + " s" : "—"}</span>
+            </div>
+            <div className="panel-body">
+              {analysis ? (
+                <table className="metrics-table">
+                  <caption>Measurements at cursor</caption>
+                  <tbody>
+                    {Object.entries(METRICS).map(([key, item]) => {
+                      const value = metricValue(
+                        key as Metric,
+                        frame?.landmarks ?? null,
+                        analysis.width,
+                        analysis.height,
+                        reference,
+                      );
+                      return (
+                        <tr key={key}>
+                          <th scope="row">{item.label}</th>
+                          <td>
+                            {value === null
+                              ? "—"
+                              : value.toFixed(1) +
+                                (key === "headMovement" ? "%" : "°")}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="technical-note">
+                  No samples. Load a clip and run extraction.
+                </p>
+              )}
+              <details>
+                <summary>Raw landmarks / current sample</summary>
+                {frame?.landmarks ? (
+                  <div className="table-scroll">
+                    <table>
+                      <caption>
+                        Normalized model coordinates; z is not metres. v =
+                        visibility. Low-confidence values are excluded from
+                        measurements.
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">id</th>
+                          <th scope="col">x</th>
+                          <th scope="col">y</th>
+                          <th scope="col">z</th>
+                          <th scope="col">v</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {frame.landmarks.map((point, index) => (
+                          <tr
+                            key={index}
+                            className={reliable(point) ? "" : "uncertain"}
+                          >
+                            <th scope="row">{index}</th>
+                            <td>{point.x.toFixed(3)}</td>
+                            <td>{point.y.toFixed(3)}</td>
+                            <td>{point.z.toFixed(3)}</td>
+                            <td>{point.visibility.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="technical-note">
+                    No pose at the selected time.
+                  </p>
+                )}
+              </details>
+            </div>
+          </section>
+          <details className="panel capture-notes">
+            <summary>Capture notes + limits</summary>
+            <p>
+              {cameraView === "down-the-line"
+                ? "Camera behind the golfer, looking toward the target."
+                : "Camera facing the golfer, across the target line."}{" "}
+              Fixed camera, whole body visible, one golfer, good lighting.
+            </p>
+            <p>
+              Playback seconds are not capture timing in slow-motion footage.
+              Sampling is not frame-exact. No validated 3D rotation, club
+              tracking or automated impact detection.
+            </p>
+          </details>
+        </aside>
+      </main>
+      <footer>
+        Experimental pose analysis · session-only data · no cloud inference
+      </footer>
     </div>
   );
 }

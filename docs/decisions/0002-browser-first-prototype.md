@@ -31,3 +31,7 @@ Pure measurement functions are separated from the browser pipeline. No speculati
 Unit tests cover aspect-ratio-corrected angles, missing/uncertain joints, sampling bounds, overlay sample matching and marker ordering. Type checks and the production compilation run without launching a server.
 
 Real MP4/MOV decoding, worker inference, visual layout and performance still need browser/device testing when launching is authorized. Desktop compilation is not evidence of iPhone compatibility or accurate swing tracking.
+
+## Subsequent user corrections
+
+Local execution was explicitly requested and authorized. Hosting remains unconfigured. The original light coaching-tool direction was superseded by a compact dark engineering workbench inspired by the basketball computer-vision reference. Preserve video inspection, plots, measurements and raw data over decorative product UI.

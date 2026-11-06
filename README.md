@@ -10,7 +10,7 @@ Mobile-first golf swing analysis for iPhone Safari. A local-first analyzer proto
 - Plot left/right elbow and knee angles, with missing or uncertain measurements shown as gaps.
 - Inspect head displacement relative to the manual Address marker, in percent of video height, using the nose as a 2D proxy. Camera movement and head rotation affect this measurement; it is not a physical distance.
 - Set address, top and impact markers manually, and save timestamped landmarks, metadata and markers as JSON.
-- Light interface with green accents, responsive controls and a framing guide.
+- Compact dark analysis workbench: video, cyan/pink pose overlay, signal chart, pipeline readouts and raw landmark inspection.
 
 Results stay in the current session unless exported. There is no account, database, cloud inference or saved swing history.
 
@@ -29,7 +29,7 @@ npm.cmd run build
 
 Installation/preparation copies the pinned MediaPipe runtime and downloads the pinned Lite model from Google, checking its SHA-256 hash. The generated assets live in ignored public/mediapipe/. Runtime analysis loads them from the same origin as the app, without sending the selected video elsewhere.
 
-No server was started and nothing was deployed during implementation. When you explicitly choose to run it, the development command is:
+Local execution is authorized. Nothing has been deployed. Start the development server with:
 
 ```powershell
 npm.cmd run dev
