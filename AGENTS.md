@@ -20,7 +20,7 @@ Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/deci
 
 ## Local-only work
 
-- The user subsequently authorized local execution and previews. Cloudflare Pages publication is now explicitly authorized; see decision 0003. Other hosting and cloud-processing changes require their own scope. Builds, type checks and automated tests are allowed.
+- The user subsequently authorized local execution and previews. Cloudflare static publication is authorized; the existing golfswing Worker serves only exported assets. See decision 0003. Other hosting and cloud-processing changes require their own scope. Builds, type checks and automated tests are allowed.
 - Use a compact engineering workbench, inspired by the basketball computer-vision reference: video, overlays, plots, measurements and raw data. Avoid product slogans and decorative onboarding.
 
 ## Git and release discipline

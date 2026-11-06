@@ -1,11 +1,11 @@
 # Architecture
 
-Status: browser analyzer implemented; Cloudflare Pages static hosting is authorized. See [the browser-first decision](decisions/0002-browser-first-prototype.md) and [the hosting decision](decisions/0003-cloudflare-pages.md).
+Status: browser analyzer implemented; Cloudflare Workers Static Assets hosting is authorized. See [the browser-first decision](decisions/0002-browser-first-prototype.md) and [the hosting decision](decisions/0003-cloudflare-pages.md).
 
 ## Accepted decisions
 
 - Mobile-first web application usable in iPhone Safari without a running personal computer.
-- Next.js, TypeScript and Tailwind. Vercel hosting was rejected; Cloudflare Pages static hosting is accepted. Hosting does not move video processing to the cloud.
+- Next.js, TypeScript and Tailwind. Vercel hosting was rejected; Cloudflare Workers Static Assets hosting is accepted. Hosting does not move video processing to the cloud.
 - Analyzer before AI coaching.
 - Hybrid processing, with client-side MediaPipe tracking and browser-side analysis as the starting preference.
 - Supabase remains optional; no database, authentication system or cloud worker has been selected.
