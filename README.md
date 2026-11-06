@@ -29,13 +29,21 @@ npm.cmd run build
 
 Installation/preparation copies the pinned MediaPipe runtime and downloads the pinned Lite model from Google, checking its SHA-256 hash. The generated assets live in ignored public/mediapipe/. Runtime analysis loads them from the same origin as the app, without sending the selected video elsewhere.
 
-Local execution is authorized. Nothing has been deployed. Start the development server with:
+Start the local development server with:
 
 ```powershell
 npm.cmd run dev
 ```
 
 That command serves on port 3000 by default and listens on the local network. It is not a hosted deployment. A phone can use the same-network address, but some browser APIs may require HTTPS; real iPhone verification is still pending.
+
+## Cloudflare Pages hosting
+
+The production build is a static export in `out/`. Cloudflare serves the interface and MediaPipe assets over HTTPS; all selected-video processing stays in the browser. No account or backend is needed to analyze a clip.
+
+Use production branch `main`, build command `npm run build`, output directory `out`, and environment variable `NODE_VERSION=24`. The build command prepares the pinned model and WASM assets; do not replace it with a bare Next.js command. Only `out/` is published.
+
+`next start` does not support static exports. Use `npm run dev` for local development. See [the hosting decision](docs/decisions/0003-cloudflare-pages.md) for tradeoffs and validation boundaries.
 
 ## Measurement limits
 

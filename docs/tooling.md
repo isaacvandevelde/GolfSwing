@@ -14,7 +14,7 @@ Ponytail source: https://github.com/DietrichGebert/ponytail, version 5.3.3, copi
 
 ## Optional tools
 
-Use connected GitHub and Vercel tools where available. Apply a relevant React/Next.js guide for UI changes, Vercel deployment/verification guidance when deploying, and Supabase guidance only if that service enters scope. These optional integrations require their own installation and account access; the repository grants neither. Avoid overlapping skill packs.
+Use connected GitHub and Cloudflare tools where available. Apply a relevant React/Next.js guide for UI changes, Cloudflare guidance for hosting, and Supabase guidance only if that service enters scope. The installed Cloudflare plugin provides account API access through MCP; it is not an application dependency. These optional integrations require their own installation and account access; the repository grants neither. Avoid overlapping skill packs.
 
 Shared conventions: concise context, focused branches, meaningful checks, recorded decisions and separate reporting of local, pushed and deployed states. Personal notes and service credentials remain outside the repository.
 

@@ -13,14 +13,14 @@ Read README.md, docs/architecture.md, docs/tooling.md and the relevant docs/deci
 ## Skills and tools
 
 - Read .agents/skills/ponytail/SKILL.md for coding, .agents/skills/ponytail-review/SKILL.md for requested reviews, and .agents/skills/golfswing-verification/SKILL.md for relevant implementation checks. Prefer these repository copies over duplicate personal installations.
-- Use one relevant React/Next.js guide, Vercel deployment/verification skills for their respective tasks, and Supabase skills only if that service enters scope. See docs/tooling.md.
-- Prefer connected GitHub/Vercel tools when sufficient; use local Git for the working tree. Inspect the actual tool availability before choosing a fallback.
+- Use one relevant React/Next.js guide, Cloudflare skills for hosting, and Supabase skills only if that service enters scope. See docs/tooling.md.
+- Prefer connected GitHub/Cloudflare tools when sufficient; use local Git for the working tree. Inspect the actual tool availability before choosing a fallback.
 - Reuse patterns from other projects selectively. Do not import their credentials, service IDs, production permissions, business logic or full skill collections.
 - New shared skills belong in .agents/skills/<name>/SKILL.md. Read external skills before installing, record source and version, and avoid duplicate instructions. Personal plugin installations are not repository dependencies.
 
 ## Local-only work
 
-- The user subsequently authorized local execution and previews. Do not deploy or change hosting until explicitly requested. Builds, type checks and automated tests are allowed.
+- The user subsequently authorized local execution and previews. Cloudflare Pages publication is now explicitly authorized; see decision 0003. Other hosting and cloud-processing changes require their own scope. Builds, type checks and automated tests are allowed.
 - Use a compact engineering workbench, inspired by the basketball computer-vision reference: video, overlays, plots, measurements and raw data. Avoid product slogans and decorative onboarding.
 
 ## Git and release discipline

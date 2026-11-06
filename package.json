@@ -5,12 +5,11 @@
   "scripts": {
     "dev": "node scripts/copy-mediapipe.mjs && next dev --hostname 0.0.0.0",
     "build": "node scripts/copy-mediapipe.mjs && next build",
-    "start": "next start --hostname 0.0.0.0",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node --check public/pose-worker.js && node --experimental-strip-types --test tests/*.test.ts",
     "postinstall": "node scripts/copy-mediapipe.mjs",
     "prepare:assets": "node scripts/copy-mediapipe.mjs",
-    "format:check": "prettier --check src tests public/pose-worker.js scripts package.json tsconfig.json postcss.config.mjs"
+    "format:check": "prettier --check src tests public/pose-worker.js scripts package.json tsconfig.json postcss.config.mjs next.config.mjs"
   },
   "engines": {
     "node": "^22.18.0 || ^24.0.0"
