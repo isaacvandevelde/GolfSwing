@@ -159,6 +159,37 @@ h2 {
   height: 100%;
   pointer-events: none;
 }
+/* Keep the video and SVG in the same page on iPhone, including when enlarged. */
+.video-panel.is-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overscroll-behavior: contain;
+  overflow: auto;
+}
+.video-panel.is-expanded .video-stage {
+  aspect-ratio: auto;
+  min-height: 0;
+}
+.video-panel .panel-heading {
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.video-panel .panel-heading h2 {
+  margin-right: auto;
+}
+.video-panel button {
+  min-height: 44px;
+}
+.video-panel .transport-buttons {
+  flex-wrap: wrap;
+}
 .empty-stage {
   display: grid;
   place-content: center;

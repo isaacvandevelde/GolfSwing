@@ -13,6 +13,7 @@ import {
 } from "@/domain/analysis";
 import type { Analysis, Landmark, Markers, Metric } from "@/domain/analysis";
 import type { Progress } from "@/browser/analyze-video";
+import { observeVideoTime } from "@/browser/observe-video-time";
 
 function MovementChart({
   analysis,
@@ -132,8 +133,13 @@ export default function SwingStudio() {
   const [overlay, setOverlay] = useState(true);
   const [markers, setMarkers] = useState<Markers>({});
   const [cameraView, setCameraView] = useState("down-the-line");
+  const [expanded, setExpanded] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [seeking, setSeeking] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+  const viewer = useRef<HTMLElement>(null);
+  const expandButton = useRef<HTMLButtonElement>(null);
   const controller = useRef<AbortController | null>(null);
   const busy = progress !== null;
 
@@ -146,19 +152,36 @@ export default function SwingStudio() {
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => {
     const player = video.current;
-    if (!player || !analysis) return;
-    let frameId = 0;
-    const tick = () => {
-      setTime(player.currentTime);
-      if (!player.paused) frameId = requestAnimationFrame(tick);
+    if (player) return observeVideoTime(player, setTime);
+  }, [url]);
+  useEffect(() => {
+    if (!expanded) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    expandButton.current?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setExpanded(false);
+      if (event.key !== "Tab") return;
+      const controls = viewer.current?.querySelectorAll<HTMLElement>(
+        "button:not(:disabled), input:not(:disabled), select:not(:disabled)",
+      );
+      const first = controls?.[0];
+      const last = controls?.[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
-    player.addEventListener("play", tick);
-    if (!player.paused) tick();
+    document.addEventListener("keydown", keydown);
     return () => {
-      player.removeEventListener("play", tick);
-      cancelAnimationFrame(frameId);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", keydown);
+      expandButton.current?.focus();
     };
-  }, [analysis, url]);
+  }, [expanded]);
 
   function chooseFile(selected: File | undefined) {
     if (!selected || busy) return;
@@ -181,6 +204,8 @@ export default function SwingStudio() {
     setUrl(URL.createObjectURL(selected));
     setDuration(0);
     setTime(0);
+    setPlaying(false);
+    setSeeking(false);
     setAnalysis(null);
     setMarkers({});
   }
@@ -222,9 +247,23 @@ export default function SwingStudio() {
     const next = Math.max(0, Math.min(duration, value));
     if (video.current) {
       video.current.pause();
+      if (video.current.currentTime !== next) setSeeking(true);
       video.current.currentTime = next;
     }
     setTime(next);
+  }
+  async function togglePlayback() {
+    const player = video.current;
+    if (!player) return;
+    if (!player.paused) player.pause();
+    else {
+      try {
+        await player.play();
+        setError("");
+      } catch {
+        setError("Playback could not start. Tap Play to try again.");
+      }
+    }
   }
   function mark(name: keyof Markers) {
     try {
@@ -289,7 +328,7 @@ export default function SwingStudio() {
 
   return (
     <div className="workbench">
-      <header className="workbench-header">
+      <header className="workbench-header" inert={expanded}>
         <h1>
           GolfSwing <span>/ analysis workbench</span>
         </h1>
@@ -299,7 +338,13 @@ export default function SwingStudio() {
       </header>
       <main className="workspace">
         <div className="viewer-column">
-          <section className="panel" aria-labelledby="video-title">
+          <section
+            ref={viewer}
+            className={`panel video-panel${expanded ? " is-expanded" : ""}`}
+            aria-labelledby="video-title"
+            role={expanded ? "dialog" : undefined}
+            aria-modal={expanded || undefined}
+          >
             <div className="panel-heading">
               <h2 id="video-title">01 / Video + pose</h2>
               <label className="inline-control">
@@ -310,14 +355,27 @@ export default function SwingStudio() {
                 />{" "}
                 Skeleton
               </label>
+              <button
+                ref={expandButton}
+                disabled={!url || busy}
+                aria-expanded={expanded}
+                aria-label={
+                  expanded
+                    ? "Close expanded video"
+                    : "Expand video with overlay"
+                }
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? "Close ✕" : "Expand ⛶"}
+              </button>
             </div>
             {url ? (
               <div className="video-stage">
                 <video
                   ref={video}
                   src={url}
-                  controls
                   playsInline
+                  disablePictureInPicture
                   preload="auto"
                   onLoadedMetadata={(event) => {
                     const seconds = event.currentTarget.duration;
@@ -332,53 +390,64 @@ export default function SwingStudio() {
                       );
                     } else setDuration(seconds);
                   }}
-                  onTimeUpdate={(event) =>
-                    setTime(event.currentTarget.currentTime)
-                  }
-                  onSeeked={(event) => setTime(event.currentTarget.currentTime)}
+                  onPlay={() => setPlaying(true)}
+                  onPause={() => setPlaying(false)}
+                  onEnded={() => setPlaying(false)}
+                  onSeeking={() => setSeeking(true)}
+                  onSeeked={() => setSeeking(false)}
                   onError={() => {
                     setDuration(0);
+                    setPlaying(false);
+                    setSeeking(false);
                     setError(
                       "This video could not be opened. Try exporting it as an MP4 from Photos.",
                     );
                   }}
                   aria-label="Your swing video"
                 />
-                {analysis && overlay && frame?.landmarks && (
+                {analysis && overlay && !seeking && frame?.landmarks && (
                   <svg
                     className="pose-overlay"
                     viewBox={`0 0 ${analysis.width} ${analysis.height}`}
+                    preserveAspectRatio="xMidYMid meet"
                     aria-label="Detected body landmarks"
                     role="img"
                   >
-                    {CONNECTIONS.map(([a, b]) => {
-                      const p = frame.landmarks?.[a];
-                      const q = frame.landmarks?.[b];
-                      return reliable(p) && reliable(q) ? (
-                        <line
-                          key={`${a}-${b}`}
-                          x1={p.x * analysis.width}
-                          y1={p.y * analysis.height}
-                          x2={q.x * analysis.width}
-                          y2={q.y * analysis.height}
-                          stroke={a % 2 ? "#64d9ed" : "#ed91c8"}
-                          strokeWidth={Math.max(2, analysis.width / 220)}
-                        />
-                      ) : null;
-                    })}
-                    {frame.landmarks.map((p, i) =>
-                      reliable(p) ? (
-                        <circle
-                          key={i}
-                          cx={p.x * analysis.width}
-                          cy={p.y * analysis.height}
-                          r={Math.max(3, analysis.width / 140)}
-                          fill={i % 2 ? "#64d9ed" : "#ed91c8"}
-                          stroke="#101214"
-                          strokeWidth={Math.max(1, analysis.width / 600)}
-                        />
-                      ) : null,
-                    )}
+                    <defs>
+                      <clipPath id="pose-frame">
+                        <rect width={analysis.width} height={analysis.height} />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#pose-frame)">
+                      {CONNECTIONS.map(([a, b]) => {
+                        const p = frame.landmarks?.[a];
+                        const q = frame.landmarks?.[b];
+                        return reliable(p) && reliable(q) ? (
+                          <line
+                            key={`${a}-${b}`}
+                            x1={p.x * analysis.width}
+                            y1={p.y * analysis.height}
+                            x2={q.x * analysis.width}
+                            y2={q.y * analysis.height}
+                            stroke={a % 2 ? "#64d9ed" : "#ed91c8"}
+                            strokeWidth={Math.max(2, analysis.width / 220)}
+                          />
+                        ) : null;
+                      })}
+                      {frame.landmarks.map((p, i) =>
+                        reliable(p) ? (
+                          <circle
+                            key={i}
+                            cx={p.x * analysis.width}
+                            cy={p.y * analysis.height}
+                            r={Math.max(3, analysis.width / 140)}
+                            fill={i % 2 ? "#64d9ed" : "#ed91c8"}
+                            stroke="#101214"
+                            strokeWidth={Math.max(1, analysis.width / 600)}
+                          />
+                        ) : null,
+                      )}
+                    </g>
                   </svg>
                 )}
               </div>
@@ -414,6 +483,9 @@ export default function SwingStudio() {
                 aria-valuetext={time.toFixed(2) + " seconds"}
               />
               <div className="transport-buttons">
+                <button disabled={!duration || busy} onClick={togglePlayback}>
+                  {playing ? "Pause" : "Play"}
+                </button>
                 <button
                   disabled={!analysis}
                   onClick={() => seek(time - 1 / (analysis?.sampleRate || 15))}
@@ -430,9 +502,18 @@ export default function SwingStudio() {
                   {time.toFixed(2)} / {duration.toFixed(2)} s
                 </span>
               </div>
+              {expanded && error && (
+                <p role="alert" className="message error">
+                  {error}
+                </p>
+              )}
             </div>
           </section>
-          <section className="panel" aria-labelledby="results-title">
+          <section
+            className="panel"
+            aria-labelledby="results-title"
+            inert={expanded}
+          >
             <div className="panel-heading">
               <h2 id="results-title">02 / Measurements</h2>
               <span>2D projection</span>
@@ -481,7 +562,11 @@ export default function SwingStudio() {
               </p>
             </div>
           </section>
-          <section className="panel" aria-labelledby="phase-title">
+          <section
+            className="panel"
+            aria-labelledby="phase-title"
+            inert={expanded}
+          >
             <div className="panel-heading">
               <h2 id="phase-title">03 / Manual events</h2>
               <button
@@ -510,7 +595,7 @@ export default function SwingStudio() {
             </div>
           </section>
         </div>
-        <aside className="inspector">
+        <aside className="inspector" inert={expanded}>
           <section className="panel" aria-labelledby="input-title">
             <div className="panel-heading">
               <h2 id="input-title">Input</h2>
@@ -728,7 +813,7 @@ export default function SwingStudio() {
           </details>
         </aside>
       </main>
-      <footer>
+      <footer inert={expanded}>
         Experimental pose analysis · session-only data · no cloud inference
       </footer>
     </div>
