@@ -6,7 +6,7 @@ Mobile-first golf swing analysis for iPhone Safari. A local-first analyzer proto
 
 - Select an MP4 or MOV from the device, up to 20 seconds and 150 MB. The actual codec must be supported by the browser; an MP4/MOV extension alone does not guarantee decoding.
 - Run MediaPipe body tracking in a dedicated browser worker, with progress and cancellation. Video and landmarks are not uploaded.
-- Inspect a skeleton overlay, scrub the playback timeline and step between samples.
+- Inspect a skeleton overlay, scrub the playback timeline and step between samples. Use Expand to keep the video, lines and playback controls together across the browser viewport, including on iPhone; Close returns to the workbench.
 - Plot left/right elbow and knee angles, with missing or uncertain measurements shown as gaps.
 - Inspect head displacement relative to the manual Address marker, in percent of video height, using the nose as a 2D proxy. Camera movement and head rotation affect this measurement; it is not a physical distance.
 - Set address, top and impact markers manually, and save timestamped landmarks, metadata and markers as JSON.
@@ -61,3 +61,5 @@ Angles are projected 2D joint angles corrected for video aspect ratio. A straigh
 - [Third-party notices](docs/third-party.md)
 
 The agent implements the app; meaningful architecture choices are discussed with the user first. Personal context stays outside this public repository.
+
+See [overlay verification](docs/iphone-overlay-verification.md) for browser checks and pending device testing, and [backend feedback research](docs/backend-feedback-proposal.md) for retrieved datasets and proposed next steps.
