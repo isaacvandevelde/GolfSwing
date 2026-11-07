@@ -61,8 +61,12 @@ Use the [verification skill](../.agents/skills/golfswing-verification/SKILL.md).
 
 The original discussion prioritized timestamped raw landmarks, projected joint angles, head displacement and manually selected phases before AI coaching. The browser app preserves those landmarks in JSON; no new inference is needed to compute head displacement. Camera-specific recording guidance is shown in the interface.
 
-Head displacement uses the nose landmark relative to the nearest sample at the manual address marker. Pixel-space displacement is divided by video height and shown as a percentage, not centimetres or a quality judgment. Missing or uncertain reference/current landmarks remain unavailable. Head rotation and camera motion influence this proxy. True 3D rotation, club tracking, automatic impact detection, annotated-video export and swing comparison remain later work, not implemented features.
+Head displacement uses the nose landmark relative to the nearest sample at the manual address marker. Pixel-space displacement is divided by video height and shown as a percentage, not centimetres or a quality judgment. Missing or uncertain reference/current landmarks remain unavailable. Head rotation and camera motion influence this proxy. True 3D rotation, automatic impact detection, annotated-video export and swing comparison remain later work. Assisted clubhead and ball patch tracking is now implemented separately; it does not estimate shaft orientation or identify objects automatically.
 
 ## Analysis workbench interface
 
 The user superseded the initial consumer coaching-tool visual direction with an engineering workbench, based on Jeremy Park's basketball visualization in https://github.com/jeremyipark/vision-demos. Use compact dark panels, prominent annotated video, color-coded body sides, signal plots and inspectable raw landmarks. No slogans, product onboarding or illustrative fake data. This changes presentation, not the accepted browser-first processing architecture. No source code or assets from that reference were copied.
+
+## Assisted object tracking
+
+Accepted in [decision 0004](decisions/0004-assisted-object-tracking.md). `src/browser/track-object.ts` decodes one short interval and crops at source resolution; `src/browser/object-tracking-worker.ts` runs the pure matching logic from `src/domain/object-tracking.ts`. `src/ui/object-tracking.tsx` owns marking/correction and presents the trails in the existing video viewport. Video decoding and worker requests reuse the existing browser helpers. No new dependency, trained model, service or upload is involved. Body and object runs are serialized to bound resource use.
