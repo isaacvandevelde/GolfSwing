@@ -9,7 +9,7 @@ import type { Analysis, PoseFrame } from "../domain/analysis.ts";
 
 export type Progress = { fraction: number; message: string };
 
-function videoEvent(
+export function videoEvent(
   video: HTMLVideoElement,
   event: string,
   signal: AbortSignal,
@@ -55,7 +55,7 @@ function videoEvent(
   });
 }
 
-function workerRequest<T>(
+export function workerRequest<T>(
   worker: Worker,
   data: unknown,
   signal: AbortSignal,
@@ -81,7 +81,7 @@ function workerRequest<T>(
     const failed = () =>
       fail(
         new Error(
-          "Body tracking could not start in this browser. Reload the page and try again.",
+          "Tracking could not start in this browser. Reload the page and try again.",
         ),
       );
     const aborted = () =>
@@ -89,9 +89,7 @@ function workerRequest<T>(
     const timeout = setTimeout(
       () =>
         fail(
-          new Error(
-            "Body tracking timed out. Keep this tab visible and try again.",
-          ),
+          new Error("Tracking timed out. Keep this tab visible and try again."),
         ),
       60000,
     );

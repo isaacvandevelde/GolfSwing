@@ -488,3 +488,60 @@ footer {
     min-width: 0;
   }
 }
+.object-controls {
+  border-top: 1px solid var(--line);
+  padding-top: 4px;
+}
+.object-controls summary {
+  min-height: 44px;
+}
+.object-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.object-toolbar label {
+  min-width: 0;
+}
+.object-controls input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  display: inline-block;
+}
+.object-overlay.is-picking {
+  pointer-events: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+.target-editor {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 10px 0;
+}
+.target-magnifier {
+  width: 112px;
+  height: 112px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+.target-adjustments {
+  min-width: 0;
+}
+.target-adjustments button {
+  min-width: 44px;
+  padding: 6px;
+}
+.object-controls .message {
+  margin-top: 8px;
+}
+.video-panel.is-expanded .transport {
+  max-height: 48dvh;
+  overflow-y: auto;
+}
+.video-panel.is-expanded .video-stage {
+  min-height: 100px;
+}

@@ -14,6 +14,11 @@ import {
 import type { Analysis, Landmark, Markers, Metric } from "@/domain/analysis";
 import type { Progress } from "@/browser/analyze-video";
 import { observeVideoTime } from "@/browser/observe-video-time";
+import {
+  ObjectControls,
+  ObjectOverlay,
+  useObjectTracking,
+} from "./object-tracking";
 
 function MovementChart({
   analysis,
@@ -136,12 +141,17 @@ export default function SwingStudio() {
   const [expanded, setExpanded] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [seeking, setSeeking] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const input = useRef<HTMLInputElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const viewer = useRef<HTMLElement>(null);
   const expandButton = useRef<HTMLButtonElement>(null);
   const controller = useRef<AbortController | null>(null);
-  const busy = progress !== null;
+  const tracking = useObjectTracking(file, video, time, seek);
+  const busy = progress !== null || tracking.progress !== null;
+  const hasTracks =
+    tracking.tracks.clubhead.length > 0 || tracking.tracks.ball.length > 0;
+  const playbackStep = 1 / (hasTracks ? 60 : (analysis?.sampleRate ?? 60));
 
   useEffect(
     () => () => {
@@ -162,9 +172,11 @@ export default function SwingStudio() {
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setExpanded(false);
       if (event.key !== "Tab") return;
-      const controls = viewer.current?.querySelectorAll<HTMLElement>(
-        "button:not(:disabled), input:not(:disabled), select:not(:disabled)",
-      );
+      const controls = Array.from(
+        viewer.current?.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), input:not(:disabled), select:not(:disabled), summary",
+        ) ?? [],
+      ).filter((element) => element.getClientRects().length > 0);
       const first = controls?.[0];
       const last = controls?.[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -200,6 +212,8 @@ export default function SwingStudio() {
       );
       return;
     }
+    tracking.reset();
+    setDimensions({ width: 0, height: 0 });
     setFile(selected);
     setUrl(URL.createObjectURL(selected));
     setDuration(0);
@@ -211,7 +225,7 @@ export default function SwingStudio() {
   }
 
   async function analyze() {
-    if (!file || busy || !duration) return;
+    if (!file || busy || !duration || tracking.draft) return;
     video.current?.pause();
     const run = new AbortController();
     controller.current = run;
@@ -274,9 +288,20 @@ export default function SwingStudio() {
     }
   }
   function download() {
-    if (!analysis) return;
+    if (!analysis && !hasTracks) return;
     const data = {
       ...analysis,
+      version: 2,
+      duration,
+      ...dimensions,
+      objectTracking: {
+        version: 1,
+        method: "assisted fixed-template correlation",
+        sampleRate: 60,
+        coordinates: "normalized image x/y",
+        similarityBasis: "appearance correlation; not a calibrated probability",
+        tracks: tracking.tracks,
+      },
       cameraView,
       markers,
       timeBasis: "video playback seconds; not capture-frame timing",
@@ -324,7 +349,11 @@ export default function SwingStudio() {
     ? analysis.frames.filter((item) => item.landmarks !== null).length
     : 0;
   const canAnalyze =
-    !!file && duration > 0 && duration <= MAX_DURATION && !busy;
+    !!file &&
+    duration > 0 &&
+    duration <= MAX_DURATION &&
+    !busy &&
+    !tracking.draft;
 
   return (
     <div className="workbench">
@@ -333,7 +362,13 @@ export default function SwingStudio() {
           GolfSwing <span>/ analysis workbench</span>
         </h1>
         <span className="run-status">
-          {busy ? "PROCESSING" : analysis ? "ANALYZED" : "IDLE"}
+          {busy
+            ? "PROCESSING"
+            : analysis
+              ? "ANALYZED"
+              : hasTracks
+                ? "TRACKED"
+                : "IDLE"}
         </span>
       </header>
       <main className="workspace">
@@ -357,7 +392,7 @@ export default function SwingStudio() {
               </label>
               <button
                 ref={expandButton}
-                disabled={!url || busy}
+                disabled={!url || progress !== null}
                 aria-expanded={expanded}
                 aria-label={
                   expanded
@@ -379,6 +414,10 @@ export default function SwingStudio() {
                   preload="auto"
                   onLoadedMetadata={(event) => {
                     const seconds = event.currentTarget.duration;
+                    setDimensions({
+                      width: event.currentTarget.videoWidth,
+                      height: event.currentTarget.videoHeight,
+                    });
                     if (
                       !Number.isFinite(seconds) ||
                       seconds <= 0 ||
@@ -450,6 +489,14 @@ export default function SwingStudio() {
                     </g>
                   </svg>
                 )}
+                {!seeking && (
+                  <ObjectOverlay
+                    tracker={tracking}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    time={time}
+                  />
+                )}
               </div>
             ) : (
               <div className="empty-stage">
@@ -475,26 +522,29 @@ export default function SwingStudio() {
                 type="range"
                 min={0}
                 max={duration || 1}
-                step={analysis ? 1 / analysis.sampleRate : 0.01}
+                step={playbackStep}
                 value={time}
-                disabled={!duration}
+                disabled={!duration || busy || !!tracking.draft}
                 onChange={(event) => seek(Number(event.target.value))}
                 aria-label="Video position"
                 aria-valuetext={time.toFixed(2) + " seconds"}
               />
               <div className="transport-buttons">
-                <button disabled={!duration || busy} onClick={togglePlayback}>
+                <button
+                  disabled={!duration || busy || !!tracking.draft}
+                  onClick={togglePlayback}
+                >
                   {playing ? "Pause" : "Play"}
                 </button>
                 <button
-                  disabled={!analysis}
-                  onClick={() => seek(time - 1 / (analysis?.sampleRate || 15))}
+                  disabled={!duration || busy || !!tracking.draft}
+                  onClick={() => seek(time - playbackStep)}
                 >
                   ← Sample
                 </button>
                 <button
-                  disabled={!analysis}
-                  onClick={() => seek(time + 1 / (analysis?.sampleRate || 15))}
+                  disabled={!duration || busy || !!tracking.draft}
+                  onClick={() => seek(time + playbackStep)}
                 >
                   Sample →
                 </button>
@@ -502,6 +552,12 @@ export default function SwingStudio() {
                   {time.toFixed(2)} / {duration.toFixed(2)} s
                 </span>
               </div>
+              <ObjectControls
+                tracker={tracking}
+                video={video}
+                duration={duration}
+                disabled={busy || seeking || !duration}
+              />
               {expanded && error && (
                 <p role="alert" className="message error">
                   {error}
@@ -630,7 +686,9 @@ export default function SwingStudio() {
                 <dd>{duration ? duration.toFixed(3) + " s" : "—"}</dd>
                 <dt>Dimensions</dt>
                 <dd>
-                  {analysis ? analysis.width + " × " + analysis.height : "—"}
+                  {dimensions.width
+                    ? dimensions.width + " × " + dimensions.height
+                    : "—"}
                 </dd>
               </dl>
               <label>
@@ -706,10 +764,10 @@ export default function SwingStudio() {
               </dl>
               <button
                 className="export-button"
-                disabled={!analysis}
+                disabled={(!analysis && !hasTracks) || busy}
                 onClick={download}
               >
-                Export landmarks + events.json
+                Export analysis + tracks.json
               </button>
               <p className="technical-note">
                 Samples found ≠ tracking accuracy. Video and landmarks stay in
@@ -807,8 +865,9 @@ export default function SwingStudio() {
             </p>
             <p>
               Playback seconds are not capture timing in slow-motion footage.
-              Sampling is not frame-exact. No validated 3D rotation, club
-              tracking or automated impact detection.
+              Sampling is not frame-exact. Clubhead and ball trails are assisted
+              2D estimates. No validated 3D rotation, ball speed, spin, carry or
+              automated impact detection.
             </p>
           </details>
         </aside>
